@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iceland Budget Planner</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        form { margin-bottom: 2rem; }
+        section { margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <h1>Iceland Budget Planner</h1>
+    <form id="planner-form">
+        <label>
+            Budget (USD):
+            <input type="number" name="budget" required>
+        </label>
+        <br><br>
+        <label>
+            Start Date:
+            <input type="date" name="start-date" required>
+        </label>
+        <br><br>
+        <label>
+            End Date:
+            <input type="date" name="end-date" required>
+        </label>
+        <br><br>
+        <label>
+            Region:
+            <select name="region" required>
+                <option value="capital">Capital Area</option>
+                <option value="south">South</option>
+                <option value="east">East</option>
+                <option value="north">North</option>
+                <option value="west">West</option>
+                <option value="westfjords">Westfjords</option>
+            </select>
+        </label>
+        <br><br>
+        <button type="submit">Plan My Trip</button>
+    </form>
 
+    <section id="flights">
+        <h2>Flights</h2>
+        <p>Links or results for flights will appear here.</p>
+    </section>
+
+    <section id="accommodation">
+        <h2>Accommodation</h2>
+        <p>Links or results for accommodation will appear here.</p>
+    </section>
+
+    <section id="rental-cars">
+        <h2>Rental Cars</h2>
+        <p>Links or results for rental cars will appear here.</p>
+    </section>
+
+    <section id="tours">
+        <h2>Tours</h2>
+        <p>Links or results for tours will appear here.</p>
+    </section>
+</body>
+</html>
