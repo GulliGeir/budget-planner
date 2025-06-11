@@ -1,66 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iceland Budget Planner</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; }
-        form { margin-bottom: 2rem; }
-        section { margin-bottom: 1.5rem; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>CheapIceland Trip Planner</title>
+  <style>
+    body { background-color: #e1d4f6; font-family: 'Helvetica Neue', sans-serif; margin: 0; padding: 0; }
+    .trip-step { display: none; background: white; padding: 30px; margin: 30px auto; border-radius: 16px; max-width: 800px; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+    .trip-step.active { display: block; }
+    .trip-form { text-align: center; }
+    .trip-form label { display: block; font-weight: bold; color: #5f21c3; margin-top: 15px; margin-bottom: 5px; }
+    .trip-form input { padding: 10px 15px; margin: 5px auto; border-radius: 10px; border: 1px solid #ccc; width: 250px; font-size: 16px; display: block; }
+    .trip-form button { padding: 12px 25px; margin-top: 20px; font-weight: bold; font-size: 16px; background-color: black; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    .trip-form button:hover { background-color: #333; }
+    h2 { color: #5f21c3; font-size: 28px; font-weight: bold; margin-bottom: 30px; text-align: center; }
+    .subheading { font-size: 18px; color: #666; margin-top: -15px; margin-bottom: 30px; }
+    .hotel-card { text-align: left; border-bottom: 1px solid #eee; padding: 15px 0; }
+    .progress-bar { display: flex; justify-content: center; max-width: 800px; margin: 30px auto 0; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .progress-step {
+      flex: 1;
+      padding: 12px 10px;
+      text-align: center;
+      background: #eee;
+      color: #444;
+      border-right: 1px solid #ddd;
+      font-weight: bold;
+      cursor: pointer;           /* make clickable */
+      user-select: none;
+    }
+    .progress-step:last-child { border-right: none; }
+    .progress-step.active { background-color: #5f21c3; color: white; }
+  </style>
 </head>
 <body>
-    <h1>Iceland Budget Planner</h1>
-    <form id="planner-form">
-        <label>
-            Budget (USD):
-            <input type="number" name="budget" required>
-        </label>
-        <br><br>
-        <label>
-            Start Date:
-            <input type="date" name="start-date" required>
-        </label>
-        <br><br>
-        <label>
-            End Date:
-            <input type="date" name="end-date" required>
-        </label>
-        <br><br>
-        <label>
-            Region:
-            <select name="region" required>
-                <option value="capital">Capital Area</option>
-                <option value="south">South</option>
-                <option value="east">East</option>
-                <option value="north">North</option>
-                <option value="west">West</option>
-                <option value="westfjords">Westfjords</option>
-            </select>
-        </label>
-        <br><br>
-        <button type="submit">Plan My Trip</button>
-    </form>
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div class="progress-step active" data-step="1">1. Budget</div>
+    <div class="progress-step"        data-step="2">2. Flights</div>
+    <div class="progress-step"        data-step="3">3. Hotels</div>
+    <div class="progress-step"        data-step="4">4. Rental Cars</div>
+    <div class="progress-step"        data-step="5">5. Tours</div>
+  </div>
 
-    <section id="flights">
-        <h2>Flights</h2>
-        <p>Links or results for flights will appear here.</p>
-    </section>
+  <div class="trip-form">
+    <!-- STEP 1: Budget & Dates -->
+    <div id="step1" class="trip-step active">
+      <h2>What is your budget?</h2>
+      <p class="subheading">Let us help you plan your trip</p>
+      <input type="number" id="budget" placeholder="Enter your budget" />
 
-    <section id="accommodation">
-        <h2>Accommodation</h2>
-        <p>Links or results for accommodation will appear here.</p>
-    </section>
+      <label>Flying From:</label>
+      <input type="text" id="departureCity" placeholder="e.g. London or LHR" />
 
-    <section id="rental-cars">
-        <h2>Rental Cars</h2>
-        <p>Links or results for rental cars will appear here.</p>
-    </section>
+      <label>Going To:</label>
+      <input type="text" id="goingToCity" placeholder="e.g. Reykjavik or KEF" />
 
-    <section id="tours">
-        <h2>Tours</h2>
-        <p>Links or results for tours will appear here.</p>
-    </section>
+      <label>Start Date:</label>
+      <input type="date" id="startDate" />
+
+      <label>End Date:</label>
+      <input type="date" id="endDate" />
+
+      <button onclick="goToFlights()">Find My Trip 🧭</button>
+    </div>
+
+    <!-- STEP 2: Flights -->
+    <div id="step2" class="trip-step">
+      <h2>✈️ Flights Matching Your Dates</h2>
+      <div id="flightWidgetContainer"></div>
+      <button onclick="showStep(3); showHotelsWidget()">Continue to Hotels 🛏️</button>
+    </div>
+
+    <!-- STEP 3: Hotels -->
+    <div id="step3" class="trip-step">
+      <h2>🏨 Hotels for Your Trip</h2>
+      <div id="hotelsContainer"></div>
+      <button onclick="showStep(4); loadCarWidget()">Continue</button>
+    </div>
+
+    <!-- STEP 4: Rental Cars -->
+    <div id="step4" class="trip-step">
+      <h2>🚗 Rental Cars</h2>
+      <div id="carRentalWidgetContainer"></div>
+      <button onclick="showStep(5); loadTours()">Continue to Tours 🎟️</button>
+    </div>
+
+    <!-- STEP 5: Tours -->
+    <div id="step5" class="trip-step">
+      <h2>🎟️ Tours & Activities</h2>
+      <div id="toursWidgetContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    // utility to show a panel and update the progress bar
+    function showStep(n) {
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById('step'+i).classList.remove('active');
+        document.querySelector('.progress-step[data-step="'+i+'"]').classList.remove('active');
+      }
+      document.getElementById('step'+n).classList.add('active');
+      document.querySelector('.progress-step[data-step="'+n+'"]').classList.add('active');
+    }
+
+    // make the progress bar clickable
+    document.querySelectorAll('.progress-step').forEach(el => {
+      const step = Number(el.getAttribute('data-step'));
+      el.addEventListener('click', () => showStep(step));
+    });
+
+    // STEP 1 → Flights
+    function goToFlights() {
+      const origin      = document.getElementById('departureCity').value.trim().toUpperCase();
+      const destination = document.getElementById('goingToCity'  ).value.trim().toUpperCase();
+      const start       = document.getElementById('startDate'    ).value;
+      const end         = document.getElementById('endDate'      ).value;
+      if (!origin || !destination || !start || !end) {
+        alert('Please fill in all fields.');
+        return;
+      }
+      window.tripData = { origin, destination, start, end };
+
+      // Inject Flights widget
+      const src = [
+        'https://tp.media/content',
+        '?trs=408072',
+        '&shmarker=623638',
+        '&locale=en_us',
+        `&Autocomplete_3=${encodeURIComponent(origin)}`,      // origin
+        `&Autocomplete_1=${encodeURIComponent(destination)}`, // destination
+        `&DepartDate=${start}`,
+        `&ReturnDate=${end}`,
+        '&Checkbox_9=false',
+        '&powered_by=true',
+        '&primary=%230C131D',
+        '&dark=%230C131D',
+        '&light=%23FFFFFF',
+        '&secondary=%23F1EDFC',
+        '&promo_id=7293',
+        '&campaign_id=200'
+      ].join('');
+      const fc = document.getElementById('flightWidgetContainer');
+      fc.innerHTML = '';
+      const fs = document.createElement('script');
+      fs.async = true; fs.charset = 'utf-8'; fs.src = src;
+      fc.appendChild(fs);
+
+      showStep(2);
+    }
+
+    // STEP 2 → Hotels
+    function showHotelsWidget() {
+      const container = document.getElementById('hotelsContainer');
+      container.innerHTML = '';
+      const s = document.createElement('script');
+      s.async = true;
+      s.charset = 'utf-8';
+      s.src =
+        'https://tp.media/content' +
+        '?currency=usd' +
+        '&trs=408072' +
+        '&shmarker=623638' +
+        '&show_hotels=true' +
+        '&powered_by=true' +
+        '&locale=en' +
+        '&searchUrl=search.hotellook.com' +
+        '&primary_override=%23FF8E01' +
+        '&color_button=%23FF8E01' +
+        '&color_icons=%23FF8E01' +
+        '&secondary=%23FFFFFF' +
+        '&dark=%23262626' +
+        '&light=%23FFFFFF' +
+        '&special=%23C4C4C4' +
+        '&color_focused=%23FF8E01' +
+        '&border_radius=5' +
+        '&plain=false' +
+        '&promo_id=7873' +
+        '&campaign_id=101';
+      container.appendChild(s);
+    }
+
+    // STEP 3 → Cars
+    function loadCarWidget() {
+      const container = document.getElementById('carRentalWidgetContainer');
+      container.innerHTML = '';
+      const s = document.createElement('script');
+      s.async = true; s.charset = 'utf-8';
+      s.src = '//c87.travelpayouts.com/content?trs=408072&shmarker=623638&locale=en&country=116&city=120921&powered_by=true&promo_id=2466';
+      container.appendChild(s);
+    }
+
+    // STEP 4 → Tours
+    function loadTours() {
+      const container = document.getElementById('toursWidgetContainer');
+      container.innerHTML = '';
+      const w = document.createElement('div');
+      w.className = 'bokunWidget';
+      w.setAttribute('data-src',
+        'https://widgets.bokun.io/online-sales/46667088-976a-495c-a537-85add82a2ef0/product-list/60597'
+      );
+      const t = document.createElement('script');
+      t.async = true;
+      t.src = 'https://widgets.bokun.io/assets/javascripts/apps/build/BokunWidgetsLoader.js?bookingChannelUUID=46667088-976a-495c-a537-85add82a2ef0';
+      container.appendChild(w);
+      container.appendChild(t);
+    }
+  </script>
 </body>
 </html>
